@@ -1,0 +1,22 @@
+{
+  "name": "node_lite_shop",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "vitalii",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "mustard-ui": "^1.0.4",
+    "mysql": "^2.18.1",
+    "nodemailer": "^6.6.3",
+    "nodemon": "^2.0.12",
+    "pug": "^3.0.2"
+  },
+  "devDependencies": {
+    "@types/nodemon": "^1.19.1"
+  }
+}
