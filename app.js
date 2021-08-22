@@ -13,9 +13,9 @@ let mysql = require('mysql');
 
 let con = mysql.createConnection({
     host: 'localhost',
-    user: 'vitalii',
-    password: 'password',
-    database: 'lite_shop'
+    user: '*******',
+    password: '********',
+    database: '*********'
 });
 
 process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
