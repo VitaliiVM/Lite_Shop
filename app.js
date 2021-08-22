@@ -18,6 +18,8 @@ let con = mysql.createConnection({
     database: 'lite_shop'
 });
 
+process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
+
 
 app.listen(3000, function () {
     console.log('node express work on 3000');
@@ -50,7 +52,7 @@ app.get('/', function (req, res) {
     });
 
     Promise.all([cat, catDescription]).then(function (value) {
-        console.log(value[1]);
+        // console.log(value[1]);
         res.render('index', {
             goods: JSON.parse(JSON.stringify(value[0])),
             cat: JSON.parse(JSON.stringify(value[1]))
@@ -109,13 +111,13 @@ app.get('/order', function (req, res) {
 app.post('/get-category-list', function (req, res) {
     con.query('SELECT id, category FROM category', function (err, result, fields) {
         if (err) throw err;
-        console.log(result);
+        // console.log(result);
         res.json(result);
     });
 })
 
 app.post('/get-goods-info', function (req, res) {
-    console.log(req.body.key);
+    // console.log(req.body.key);
     if (req.body.key.length != 0) {
         let bodyKey = 'SELECT id,name,cost FROM goods WHERE id IN (' + req.body.key.join(',') + ')';
         con.query(bodyKey, function (err, result, fields) {
@@ -133,7 +135,7 @@ app.post('/get-goods-info', function (req, res) {
 })
 
 app.post('/finish-order', function (req, res) {
-    console.log(req.body);
+    // console.log(req.body);
     if (req.body.key.length != 0) {
         let key = Object.keys(req.body.key);
         let bodyKey = 'SELECT id,name,cost FROM goods WHERE id IN (' + key.join(',') + ')';
@@ -141,12 +143,35 @@ app.post('/finish-order', function (req, res) {
             if (err) throw err;
             console.log(result);
             sendMail(req.body, result).catch(console.error);
+            saveOrder(req.body, result);
             res.send('1');
         });
     } else {
         res.send('0');
     }
 });
+
+function saveOrder(data, result) {
+    let sql = "INSERT INTO user_info (user_name, user_phone, user_email,address) VALUES ('" + data.username +
+        "', '" + data.phone + "', '" + data.email + "','" + data.address + "')";
+    con.query(sql, function (error, result2) {
+        if (error) throw error;
+        console.log('1 user info saved');
+        let userId = result2.insertId;
+        date = new Date() / 1000;
+        for (let i = 0; i < result.length; i++) {
+            sql = "INSERT INTO shop_order (date, user_id, goods_id, goods_cost, goods_amount, total) VALUES (" + date + ", 45,"
+                + result[i]['id'] + ", " + result[i]['cost'] + "," + data.key[result[i]['id']] +
+                ", " + data.key[result[i]['id']] * result[i]['cost'] + ")";
+            console.log(sql);
+            con.query(sql, function (error, result2) {
+                if (error) throw error;
+                console.log("1 record inserted");
+            });
+        }
+
+    });
+}
 
 async function sendMail(data, result) {
     let res = '<h2>Order in Lite Shop</h2>';
